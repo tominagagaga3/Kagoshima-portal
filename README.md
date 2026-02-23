@@ -1,64 +1,81 @@
-# WorkLounge（架空のシェアラウンジサイト）
+# ⛰️ Kagoshima News Portal
 
-Astroを使用して制作した、架空の「イベントスペース兼シェアラウンジ」のサービスサイトです。  
-デザインの再現性を担保しつつ、UIの保守性・更新性を意識したフロントエンド実装に取り組みました。
+🔗 **Site URL**  
+https://kagoshima.tominaga-pf.com/
 
----
-
-## 🔗 公開URL
-
-https://portfolio-beta-neon-68.vercel.app/
+WordPressをヘッドレスCMSとして使用し、Astroで構築したニュースポータルサイトです。  
+コンテンツ管理はWordPress、フロントエンドはAstroによる静的生成（SSG）で実装しています。
 
 ---
 
-## 🎯 制作目的
+## 🎯 Purpose
 
-- フロントエンドの静的実装力を高めるため  
-- デザインを正確に再現しながら、運用・更新しやすい構成で制作する練習  
-- Astroを用いたコンポーネント設計とレスポンシブ対応の強化  
-
----
-
-## ✨ 工夫したポイント
-
-### 1. Astroを活かした構成管理・コンポーネント設計
-
-運用や修正がしやすいよう、Astroのコンポーネント分割を意識して実装しました。
-
-- 共通パーツ（Header / Footer）をコンポーネント化し再利用性を向上  
-- ページ単位で責務を分離し、保守性の高い構成を意識  
-- CSS設計も整理し、更新時に影響範囲が広がらないよう配慮  
-
-制作体制の標準化を意識した構造になっています。
+- ヘッドレスCMS構成の理解
+- WordPress × Astro連携の実装
+- 実運用を想定したサーバー構築（Xserver）
 
 ---
 
-### 2. レスポンシブ料金表のUI改善
+## 🛠 Tech Stack
 
-料金プランは、閲覧デバイスによって情報の見え方が最適になるよう設計しました。
-
-- **PC表示：** プランごとに縦並びで、利用可能項目を視覚的に整理  
-- **スマホ表示：** 3プランをまとめた比較表形式に変更し、違いが一目で分かる構成に調整  
-
-デバイスごとの閲覧体験を意識し、情報設計を工夫しています。
-
----
-
-## 🛠 使用技術
-
-- Astro  
-- HTML / CSS  
-- JavaScript  
-- Vercel（デプロイ）
+- Frontend: Astro
+- CMS: WordPress（Headless）
+- API: WordPress REST API
+- Server: Xserver
+- Language: TypeScript / JavaScript
 
 ---
 
-## 📂 ディレクトリ構成
+## 📌 Architecture
 
-```bash
+WordPressをコンテンツ管理専用（Headless CMS）として使用し、  
+AstroからREST API経由で記事データを取得しています。
+
+WordPress（Xserver上）
+        ↓ REST API
+Astro（SSGビルド）
+        ↓
+静的サイトとして公開
+
+---
+
+## ✨ Features
+
+- WordPress管理画面から記事投稿が可能
+- Astroによる高速な静的サイト生成
+- REST APIを利用したデータ取得
+- WordPressテーマに依存しないフロントエンド設計
+- カスタムフィールド対応
+
+---
+
+## ⚡ Performance
+
+- Static Site Generationによる高速表示
+- 軽量なJavaScript構成
+- 不要なスクリプトの削減
+
+---
+
+## 📂 Project Structure
+
 src/
- ┣ assets/       # 画像・バナー素材
- ┣ components/   # UIコンポーネント（Headerなど）
- ┣ layouts/      # 共通レイアウト管理
- ┣ pages/        # 各ページ（ルーティング）
- ┗ styles/       # CSS・全体スタイル
+├── pages/
+├── lib/
+│ └── wp/ （WordPress API関連処理）
+└── assets/
+
+
+---
+
+## 🔌 WordPress Setup
+
+- Xserver上にWordPressを設置
+- REST APIを使用して記事データを取得
+- 必要に応じてカスタムフィールドを追加
+
+---
+
+
+
+
