@@ -1,4 +1,4 @@
-# ⛰️ Kagoshima News Portal
+# ⛰️ 鹿児島ニュースポータルサイト
 
 🔗 **Site URL**  
 https://kagoshima.tominaga-pf.com/
@@ -31,12 +31,6 @@ WordPressをヘッドレスCMSとして使用し、Astroで構築したニュー
 WordPressをコンテンツ管理専用（Headless CMS）として使用し、  
 AstroからREST API経由で記事データを取得しています。
 
-WordPress（Xserver上）
-        ↓ REST API
-Astro（SSGビルド）
-        ↓
-静的サイトとして公開
-
 ---
 
 ## ✨ Features
@@ -54,17 +48,6 @@ Astro（SSGビルド）
 - Static Site Generationによる高速表示
 - 軽量なJavaScript構成
 - 不要なスクリプトの削減
-
----
-
-## 📂 Project Structure
-
-src/
-├── pages/
-├── lib/
-│ └── wp/ （WordPress API関連処理）
-└── assets/
-
 
 ---
 
