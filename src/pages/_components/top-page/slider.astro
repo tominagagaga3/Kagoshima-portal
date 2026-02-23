@@ -1,53 +1,79 @@
 ---
-import { baseStyles } from "../../../styles/styles";
-import { Image, getImage } from "astro:assets";
-import banner1Img from "../../../assets/banners/banner1.png";
-import banner2Img from "../../../assets/banners/banner2.png";
-import banner3Img from "../../../assets/banners/banner3.png";
+import { getImage } from "astro:assets";
 import prevDecorationImg from "../../../assets/key-images/prev-decoration.png";
 const prevDecorationImgSrc = await getImage({ src: prevDecorationImg });
+
+import type { WpPost } from "../../../lib/wp/types";
+import { featuredImageUrl } from "../../../lib/wp/client";
+
+export interface Props {
+  posts: WpPost[];
+  idPrefix: string; 
+}
+const { posts = [] } = Astro.props;
+
+const base = posts.filter(Boolean);
+
+const loopSlides =
+  base.length >= 2
+    ? [base[base.length - 1], ...base, base[0]]
+    : base.length === 1
+      ? [base[0], base[0], base[0]] 
+      : [];
+
+
+const { idPrefix } = Astro.props;
+const slideId = `${idPrefix}-slide`;
+const prevId = `${idPrefix}-prev`;
+const nextId = `${idPrefix}-next`;
 ---
 
-<div class="slide-wrapper">
-  <div id="slide" class="slide">
-    <!-- 末尾ダミー -->
-    <div class="demo-img-wrapper">
-      <Image src={banner3Img} alt="イベントバナー" />
+
+{loopSlides.length > 0 && (
+  <div class="slide-wrapper">
+    <div
+      id={slideId}
+      class="slide"
+      data-step={`${100 / loopSlides.length}`}
+    >
+      {loopSlides.map((p, i) => {
+        const img = featuredImageUrl(p, "medium");
+        const isDummy = base.length >= 2 ? (i === 0 || i === loopSlides.length - 1) : false;
+
+        return (
+          <div class="article-wrapper" data-dummy={isDummy ? "1" : "0"}>
+            <div class="contents">
+            <a class="card" href={`/posts/${p.slug}`}>
+              <div class="card-contents">
+              {img ? (
+                <img src={img} alt={p.title.rendered} loading="lazy" />
+              ) : (
+                <div class="dummy" />
+              )}
+              <div class="textarea">
+                <div class="date">{new Date(p.date).toLocaleDateString("ja-JP")}</div>
+                <h2 set:html={p.title.rendered} />
+                <div class="excerpt">{p.meta?.top_text ?? "aaa"}</div>
+                
+              </div>
+              </div>
+            </a>
+            </div>
+          </div>
+        );
+      })}
     </div>
 
-    <!-- 本物 -->
-    <div class="demo-img-wrapper">
-      <Image src={banner1Img} alt="イベントバナー" />
-    </div>
-    <div class="demo-img-wrapper">
-      <Image src={banner2Img} alt="イベントバナー" />
-    </div>
-    <div class="demo-img-wrapper">
-      <Image src={banner3Img} alt="イベントバナー" />
-    </div>
-    <!-- 先頭ダミー -->
-    <div class="demo-img-wrapper">
-      <Image src={banner1Img} alt="イベントバナー" />
-    </div>
+    <span id={prevId} class="prev" aria-label="前へ"></span>
+    <span id={nextId} class="next" aria-label="次へ"></span>
   </div>
-
-  <span id="prev" class="prev"></span>
-  <span id="next" class="next"></span>
-</div>
+)}
 
 
 
 
 <style
   define:vars={{
-    primary: baseStyles.colors.primary,
-    accent: baseStyles.colors.accent,
-    accentLine: baseStyles.colors.accentLine,
-    base: baseStyles.colors.base,
-    white: baseStyles.colors.white,
-    xxLarge: baseStyles.fontSize.xxLarge,
-    large: baseStyles.fontSize.large,
-    small: baseStyles.fontSize.small,
     prevDecoration: `url(${prevDecorationImgSrc.src})`,
   }}
 >
@@ -60,46 +86,59 @@ const prevDecorationImgSrc = await getImage({ src: prevDecorationImg });
     list-style: none;
   }
 
-  .demo-img-wrapper {
-    background-color: var(--white);
-  }
-
-  .demo-img-wrapper img {
+  .article-wrapper img {
     width: 95%;
     height: auto;
   }
 
   .slide-wrapper {
     position: relative;
-    max-width: 900px;
+    max-width: 340px;
     height: auto;
     max-lines: 500px;
     margin: 0 auto 40px;
-    overflow: hidden;
-    border: 8px solid var(--white);
-    border-radius: 8px;
-    box-shadow: 0 0 8px 0 rgb(202 202 202 / 60%);
   }
 
 
-  .slide {
- display: flex;
-  width: 500%;
+.slide {
+  display: flex;
+  width: 100%;
   height: 100%;
   transition: transform 0.4s ease;
 }
 
 .slide div {
-  width: 20%;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.slide .card-contents{
+  width: 300px;
+  display: flex;
+  flex-flow: column;
+      border: 8px solid var(--white);
+    border-radius: 8px;
+    box-shadow: 0 0 8px 0 rgb(202 202 202 / 60%);
+}
+
+.contents img{
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+}
+
+.textarea{
+  display: flex;
+  flex-flow: column;
+}
+
   .next {
     position: absolute;
-    right: 0;
+    right: -23px;
     bottom: 45%;
     z-index: 5;
     width: 50px;
@@ -113,7 +152,7 @@ const prevDecorationImgSrc = await getImage({ src: prevDecorationImg });
   .prev {
     position: absolute;
     bottom: 45%;
-    left: 0;
+    left: -25px;
     z-index: 5;
     width: 50px;
     height: 50px;
@@ -122,40 +161,47 @@ const prevDecorationImgSrc = await getImage({ src: prevDecorationImg });
     background-size: cover;
   }
 
-  .indicator {
-    display: flex;
-    column-gap: 60px;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin: 30px auto 20px;
+  .card{
+    display: block;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .06);
   }
 
-  .indicator li {
-    display: grid;
-    place-content: center;
-    width: 240px;
-    height: 70px;
-    font-size: var(--small);
-    font-weight: 700;
-    color: var(--primary);
-    list-style: none;
-    cursor: pointer;
-    background-color: #fff;
-    border: 3px solid var(--primary);
-    border-radius: 6px;
+  .slide .textarea{
+    padding: 12px 14px 16px;
+    text-align: left;
+    display: block;
+    height: 170px;
+    color: #ff8219;
   }
 
-  .indicator li:first-of-type {
-    color: var(--white);
-    background-color: var(--primary);
+  .slide h2{
+    margin: 8px 0 8px;
+    font-size: 18px;
+    line-height: 1.3;
+    padding-left: 14px;
+  }
+  
+  .slide .date{
+    font-size: 14px;
+    color: #989898;
+    text-align: left;
+    display: block;
+    padding-top: 12px;
+    padding-left: 14px;
+
   }
 
-  @media screen and (max-width: 1000px) {
-    .indicator {
-      column-gap: 20px;
-    }
+  .slide .excerpt{
+    width: 90%;
+    margin: 0 auto;
+    color: #333;
   }
+
   @media screen and (max-width: 600px) {
   .next {
     width: 30px;
@@ -169,81 +215,65 @@ const prevDecorationImgSrc = await getImage({ src: prevDecorationImg });
   }
   }
 
+  
+
 </style>
 
+<script is:inline define:vars={{ slideId, prevId, nextId }}>
+const slide = document.getElementById(slideId);
+const prev = document.getElementById(prevId);
+const next = document.getElementById(nextId);
 
-<script>
-  const slide = document.getElementById("slide") as HTMLElement;
-const slides = slide.querySelectorAll(".demo-img-wrapper");
-const prev = document.getElementById("prev") as HTMLElement;
-const next = document.getElementById("next") as HTMLElement;
+if (!slide || !prev || !next) {
+  console.warn("carousel elements not found");
+} else {
+  const slides = slide.querySelectorAll(".article-wrapper");
 
-const realSlideCount = slides.length - 2;
-let index = 1;
-let isAnimating = false;
+  const realSlideCount = slides.length - 2;
+  let index = 1;
+  let isAnimating = false;
 
-function move() {
-  isAnimating = true;
-  slide.style.transform = `translateX(${-20 * index}%)`;
-}
-
-// 初期位置
-slide.style.transform = "translateX(-20%)";
-
-slide.addEventListener("transitionend", () => {
-  // 端のダミーに来たら瞬間移動で巻き戻す
-  if (index === realSlideCount + 1) {
-    slide.style.transition = "none";
-    index = 1;
-    slide.style.transform = `translateX(${-20 * index}%)`;
-    slide.offsetHeight; // reflow
-    slide.style.transition = "transform 0.4s ease";
+  function move() {
+    isAnimating = true;
+    slide.style.transform = `translateX(${-100 * index}%)`;
   }
 
-  if (index === 0) {
-    slide.style.transition = "none";
-    index = realSlideCount;
-    slide.style.transform = `translateX(${-20 * index}%)`;
-    slide.offsetHeight; // reflow
-    slide.style.transition = "transform 0.4s ease";
-  }
+  slide.style.transform = "translateX(-100%)";
 
-  // 次の操作を許可
-  isAnimating = false;
-});
+  slide.addEventListener("transitionend", () => {
 
-let autoSlideTimer: number;
+    if (index === realSlideCount + 1) {
+      slide.style.transition = "none";
+      index = 1;
+      slide.style.transform = `translateX(${-100 * index}%)`;
+      slide.offsetHeight; // reflow
+      slide.style.transition = "transform 0.4s ease";
+    }
 
-function startAutoSlide() {
-  autoSlideTimer = window.setInterval(() => {
+    if (index === 0) {
+      slide.style.transition = "none";
+      index = realSlideCount;
+      slide.style.transform = `translateX(${-100 * index}%)`;
+      slide.offsetHeight;
+      slide.style.transition = "transform 0.4s ease";
+    }
+
+    isAnimating = false;
+  });
+
+  function goNext() {
     if (isAnimating) return;
     index++;
     move();
-  }, 3000);
+  }
+
+  function goPrev() {
+    if (isAnimating) return;
+    index--;
+    move();
+  }
+
+  next.addEventListener("click", goNext);
+  prev.addEventListener("click", goPrev);
 }
-
-function resetAutoSlide() {
-  clearInterval(autoSlideTimer);
-  startAutoSlide();
-}
-
-function goNext() {
-  if (isAnimating) return; // ★連打対策
-  resetAutoSlide();
-  index++;
-  move();
-}
-
-function goPrev() {
-  if (isAnimating) return; // ★連打対策
-  resetAutoSlide();
-  index--;
-  move();
-}
-
-startAutoSlide();
-next.addEventListener("click", goNext);
-prev.addEventListener("click", goPrev);
-
-
 </script>

@@ -1,0 +1,96 @@
+---
+import { fetchPosts, fetchPostBySlug, featuredImageUrl } from "../../lib/wp/client";
+import "./styles.css";
+export async function getStaticPaths() {
+  const posts = await fetchPosts(100);
+  return posts.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const post = await fetchPostBySlug(slug!);
+if (!post) return new Response("Not found", { status: 404 });
+
+const img = featuredImageUrl(post, "large");
+---
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title set:html={post.title.rendered} />
+  </head>
+
+  <body>
+    <main class="container">
+      <a class="back" href="/">← 戻る</a>
+
+      <div class="article-container">
+        <div class="article">
+        <div class="title-area">
+            <div class="date">{new Date(post.date).toLocaleDateString("ja-JP")}</div>
+            <h3 set:html={post.title.rendered} >
+        </div>
+
+        <div class="banner-area">
+            {img ? <img class="hero" src={img} alt={post.title.rendered} /> : null}
+        </div>
+            <div class="article-content" set:html={post.content.rendered} />
+        </div>
+        </div>
+    </main>
+
+    <style>
+      body { 
+        margin: 0; 
+        font-family: system-ui, -apple-system, sans-serif; 
+        background: #f6f6f6; 
+    }
+      .container { 
+        max-width: 860px; 
+        margin: 0 auto; 
+        padding: 16px;
+     }
+      .back { 
+        display: inline-block; 
+        margin: 12px 0; 
+        color: #333; 
+        text-decoration: none;
+     }
+      .article { 
+        background: white; 
+        border-radius: 14px; padding: 18px; 
+        box-shadow: 0 6px 20px rgba(0,0,0,.06);
+     }
+      h1 { 
+        margin: 0 0 8px; 
+        font-size: 26px; 
+        line-height: 1.25;
+     }
+      .date { 
+        color: #777; 
+        font-size: 13px; 
+        margin-bottom: 12px;
+     }
+      .hero { 
+        width: 100%; 
+        height: 500px; 
+        object-fit: cover; 
+        border-radius: 12px; 
+        margin: 10px 0 18px;
+     }
+      .body :global(img) { 
+        max-width: 100%; 
+        height: auto;
+     }
+      .body :global(p) { 
+        line-height: 1.9;
+     }
+
+      @media screen and (max-width: 600px) {
+        .hero{
+            height: 300px;
+        }
+        }
+    </style>
+  </body>
+</html>
